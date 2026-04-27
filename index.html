@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tutorial visual e simples para acessar, usar e operar o Hermes Dashboard em http://127.0.0.1:9119." />
+  <title>Hermes Dashboard — Tutorial Visual</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="topbar" aria-label="Navegação principal">
+      <a href="#inicio" class="brand"><span class="brand-mark">⚕</span> Hermes Dashboard</a>
+      <button id="themeToggle" class="ghost-button" type="button" aria-label="Alternar tema">🌙 Tema</button>
+    </nav>
+    <section id="inicio" class="hero-grid">
+      <div>
+        <p class="eyebrow">Guia rápido + tutorial detalhado</p>
+        <h1>Aprenda a acessar e usar o Hermes Dashboard com segurança</h1>
+        <p class="hero-text">Uma interface gráfica local para gerenciar configuração, chaves de API, sessões, logs, analytics, cron jobs e skills do Hermes Agent.</p>
+        <div class="hero-actions">
+          <a class="primary-button" href="#passo-a-passo">Começar agora</a>
+          <a class="secondary-button" href="#seguranca">Ver cuidados de segurança</a>
+        </div>
+      </div>
+      <aside class="status-card" aria-label="Resumo do servidor local">
+        <span class="status-dot"></span>
+        <h2>URL padrão</h2>
+        <code>http://127.0.0.1:9119</code>
+        <p>Bind local por padrão: apenas a própria máquina acessa, ideal para proteger seu .env e suas chaves.</p>
+      </aside>
+    </section>
+  </header>
+
+  <main>
+    <section class="section" id="visao-geral">
+      <div class="section-heading">
+        <p class="eyebrow">O que é</p>
+        <h2>O Hermes Dashboard em uma frase</h2>
+        <p>É um painel web local do Hermes Agent para operar e auditar o ambiente sem depender só de comandos no terminal.</p>
+      </div>
+      <div class="cards three">
+        <article class="card"><h3>Status vivo</h3><p>Veja versão, gateway, sessões ativas e estado geral da instalação.</p></article>
+        <article class="card"><h3>Configuração visual</h3><p>Edite o config.yaml por formulário, com campos organizados por categoria.</p></article>
+        <article class="card"><h3>Operação do agente</h3><p>Consulte logs, sessões, analytics, cron jobs, skills e toolsets.</p></article>
+      </div>
+    </section>
+
+    <section class="section split" id="passo-a-passo">
+      <div>
+        <p class="eyebrow">Passo a passo</p>
+        <h2>Como iniciar o servidor local</h2>
+        <ol class="timeline">
+          <li><strong>Abra o terminal</strong><span>Use a máquina onde o Hermes Agent está instalado.</span></li>
+          <li><strong>Suba o dashboard</strong><span>Execute o comando abaixo para escutar somente em localhost.</span></li>
+          <li><strong>Abra o navegador</strong><span>Acesse http://127.0.0.1:9119.</span></li>
+          <li><strong>Confirme a API</strong><span>Se /api/status responder, o dashboard está ativo.</span></li>
+        </ol>
+      </div>
+      <div class="command-panel">
+        <h3>Comando recomendado</h3>
+        <pre><code id="cmdStart">hermes dashboard --host 127.0.0.1 --port 9119 --no-open</code></pre>
+        <button class="copy-button" data-copy="cmdStart">Copiar comando</button>
+        <h3>Teste rápido</h3>
+        <pre><code id="cmdTest">curl http://127.0.0.1:9119/api/status</code></pre>
+        <button class="copy-button" data-copy="cmdTest">Copiar teste</button>
+      </div>
+    </section>
+
+    <section class="section" id="vps">
+      <div class="section-heading">
+        <p class="eyebrow">VPS ou servidor remoto</p>
+        <h2>Como acessar de fora sem expor o painel</h2>
+        <p>Se o Hermes roda em uma VPS, mantenha o dashboard em 127.0.0.1 e use um túnel SSH. Assim o painel continua protegido.</p>
+      </div>
+      <div class="command-panel wide">
+        <pre><code id="cmdSsh">ssh -L 9119:127.0.0.1:9119 usuario@IP_DA_VPS</code></pre>
+        <button class="copy-button" data-copy="cmdSsh">Copiar túnel SSH</button>
+        <p>Depois de conectar o túnel, abra no seu navegador local: <strong>http://127.0.0.1:9119</strong></p>
+      </div>
+    </section>
+
+    <section class="section" id="abas">
+      <div class="section-heading">
+        <p class="eyebrow">Mapa da interface</p>
+        <h2>O que você encontra em cada área</h2>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Áreas do dashboard">
+        <button class="tab active" data-tab="status">Status</button>
+        <button class="tab" data-tab="config">Config</button>
+        <button class="tab" data-tab="env">API Keys</button>
+        <button class="tab" data-tab="sessions">Sessões</button>
+        <button class="tab" data-tab="logs">Logs</button>
+        <button class="tab" data-tab="cron">Cron</button>
+        <button class="tab" data-tab="skills">Skills</button>
+      </div>
+      <article class="tab-panel" id="tabPanel"></article>
+    </section>
+
+    <section class="section" id="checklist">
+      <div class="section-heading">
+        <p class="eyebrow">Checklist operacional</p>
+        <h2>Antes de considerar pronto</h2>
+      </div>
+      <div class="checklist">
+        <label><input type="checkbox"> Porta 9119 responde em 127.0.0.1.</label>
+        <label><input type="checkbox"> /api/status retorna HTTP 200.</label>
+        <label><input type="checkbox"> Dashboard não está exposto em 0.0.0.0 sem proteção.</label>
+        <label><input type="checkbox"> Config e .env aparecem corretamente no painel.</label>
+        <label><input type="checkbox"> Logs e sessões carregam sem erro.</label>
+        <label><input type="checkbox"> Cron jobs e skills estão visíveis quando habilitados.</label>
+      </div>
+    </section>
+
+    <section class="section danger" id="seguranca">
+      <p class="eyebrow">Segurança</p>
+      <h2>Não exponha suas chaves por acidente</h2>
+      <p>O dashboard consegue ler e alterar o arquivo .env, onde ficam API keys e tokens. Por isso, o modo seguro é rodar em <strong>127.0.0.1</strong>.</p>
+      <div class="cards two">
+        <article class="card"><h3>Seguro</h3><pre><code>--host 127.0.0.1</code></pre><p>Acesso local ou via túnel SSH.</p></article>
+        <article class="card warning"><h3>Evite sem proteção</h3><pre><code>--host 0.0.0.0 --insecure</code></pre><p>Só use com VPN, firewall, autenticação/reverse proxy e consciência do risco.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="section-heading"><p class="eyebrow">FAQ</p><h2>Dúvidas comuns</h2></div>
+      <details open><summary>O navegador não abre. O que faço?</summary><p>Acesse manualmente http://127.0.0.1:9119. Se estiver em VPS, crie o túnel SSH.</p></details>
+      <details><summary>Como sei se está rodando?</summary><p>Teste com curl http://127.0.0.1:9119/api/status ou verifique a porta com ss -ltnp.</p></details>
+      <details><summary>Posso compartilhar o dashboard na internet?</summary><p>Não diretamente. Ele não deve ser exposto sem autenticação e controle de rede, pois permite gerenciar secrets.</p></details>
+      <details><summary>Alterações no config.yaml valem na hora?</summary><p>Algumas mudanças exigem nova sessão ou restart do gateway/processo para efeito completo.</p></details>
+    </section>
+  </main>
+
+  <footer>
+    <p>Feito para o Squad Hermes. Tutorial estático em HTML/CSS/JS, sem dependências externas.</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
