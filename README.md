@@ -51,3 +51,15 @@ python3 -m http.server 8080
 ## Origem
 
 Conteúdo inicial solicitado ao `qwen2.5-coder:7b` via Ollama e consolidado pelo Hermes Boy para publicação no GitHub.
+
+
+## SSH Tunnel / Hostinger Docker
+
+O tutorial agora inclui uma aba/seção completa para acessar o Hermes Dashboard rodando em container Docker na Hostinger via túnel SSH, incluindo:
+
+- Ajuste do `docker-compose.yaml` com `9119:9119`
+- Inicialização do dashboard com `--host 0.0.0.0 --insecure --no-open` dentro do container
+- Testes `curl` dentro do container e na VPS
+- Túnel SSH no Mac com `ssh -f -N -L 9119:127.0.0.1:9119`
+- Comandos de manutenção
+- Checklist final de validação

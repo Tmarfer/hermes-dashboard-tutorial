@@ -21,6 +21,7 @@
         <div class="hero-actions">
           <a class="primary-button" href="#passo-a-passo">Começar agora</a>
           <a class="secondary-button" href="#seguranca">Ver cuidados de segurança</a>
+          <a class="secondary-button" href="#ssh-tunnel">Aba SSH Tunnel</a>
         </div>
       </div>
       <aside class="status-card" aria-label="Resumo do servidor local">
@@ -93,8 +94,123 @@
         <button class="tab" data-tab="logs">Logs</button>
         <button class="tab" data-tab="cron">Cron</button>
         <button class="tab" data-tab="skills">Skills</button>
+        <button class="tab" data-tab="ssh">SSH Tunnel</button>
       </div>
       <article class="tab-panel" id="tabPanel"></article>
+    </section>
+
+
+
+    <section class="section" id="ssh-tunnel">
+      <div class="section-heading">
+        <p class="eyebrow">Hostinger + Docker + SSH</p>
+        <h2>Aba SSH Tunnel: acesso seguro ao dashboard sem expor a porta publicamente</h2>
+        <p>Este roteiro cobre o cenário em que o Hermes Agent roda dentro de um container Docker na Hostinger e o painel precisa ser acessado pelo Mac via túnel SSH.</p>
+      </div>
+
+      <div class="cards three">
+        <article class="card"><h3>Objetivo</h3><p>Acessar o Hermes Dashboard na porta 9119 usando SSH, sem abrir a porta 9119 no firewall público.</p></article>
+        <article class="card"><h3>Estratégia</h3><p>Docker publica 9119 no host da VPS, mas o acesso externo real acontece pelo túnel SSH na porta 22.</p></article>
+        <article class="card"><h3>Segurança</h3><p>O dashboard usa <code>--insecure</code> apenas dentro do caminho container → VPS → túnel SSH.</p></article>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>1. docker-compose.yaml no hPanel</h3>
+        <p>No hPanel da Hostinger, vá em VPS → Gerenciador Docker → container hermes-agent → Editor .yaml. Na seção <code>ports:</code>, use:</p>
+        <pre><code id="cmdCompose">ports:
+  - "4860"
+  - "9119:9119"</code></pre>
+        <button class="copy-button" data-copy="cmdCompose">Copiar YAML</button>
+        <p class="hint"><strong>Importante:</strong> não use <code>127.0.0.1:9119:9119</code> no lado do host. Remover <code>127.0.0.1:</code> permite que o Docker proxy encaminhe a conexão para o container.</p>
+      </div>
+
+      <div class="step-grid">
+        <article class="card step-card"><span>01</span><h3>Acessar hPanel</h3><p>Entre em <code>https://hpanel.hostinger.com</code>, selecione a VPS e abra o Gerenciador Docker.</p></article>
+        <article class="card step-card"><span>02</span><h3>Editar YAML</h3><p>Selecione o container Hermes Agent, abra o Editor .yaml e ajuste a seção <code>ports</code>.</p></article>
+        <article class="card step-card"><span>03</span><h3>Implantar</h3><p>Clique em Implantar e aguarde o container voltar para <strong>Running</strong>, normalmente cerca de 30 segundos.</p></article>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>2. Entrar na VPS e no container</h3>
+        <pre><code id="cmdVps">ssh root@76.13.224.9
+docker exec -it hermes-agent-vt3l-hermes-agent-1 bash</code></pre>
+        <button class="copy-button" data-copy="cmdVps">Copiar acesso VPS/container</button>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>3. Reiniciar o dashboard dentro do container</h3>
+        <p>Mate processos antigos para evitar o erro <code>address already in use</code> e suba o dashboard aceitando conexão do Docker mapping:</p>
+        <pre><code id="cmdDashboardContainer">pkill -f "hermes dashboard" 2&gt;/dev/null
+sleep 2
+nohup hermes dashboard --host 0.0.0.0 --port 9119 --insecure --no-open &gt; /opt/data/dashboard.log 2&gt;&amp;1 &amp;</code></pre>
+        <button class="copy-button" data-copy="cmdDashboardContainer">Copiar reinício do dashboard</button>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>4. Validar dentro do container</h3>
+        <pre><code id="cmdContainerTest">sleep 5
+curl http://127.0.0.1:9119/api/status
+exit</code></pre>
+        <button class="copy-button" data-copy="cmdContainerTest">Copiar teste no container</button>
+        <p>O resultado esperado é um JSON. Se falhar, veja <code>/opt/data/dashboard.log</code>.</p>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>5. Validar na VPS, fora do container</h3>
+        <pre><code id="cmdVpsTest">curl http://127.0.0.1:9119/api/status</code></pre>
+        <button class="copy-button" data-copy="cmdVpsTest">Copiar teste na VPS</button>
+        <p>Se retornar JSON, o Docker mapping <code>9119:9119</code> está funcionando.</p>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>6. Criar túnel SSH no Mac</h3>
+        <pre><code id="cmdMacTunnel">ssh -f -N -o ServerAliveInterval=60 -L 9119:127.0.0.1:9119 root@76.13.224.9</code></pre>
+        <button class="copy-button" data-copy="cmdMacTunnel">Copiar túnel no Mac</button>
+        <p>Digite a senha quando solicitado. Se nada aparecer depois, é normal: o processo fica em background.</p>
+      </div>
+
+      <div class="command-panel wide">
+        <h3>7. Validar túnel no Mac e abrir o navegador</h3>
+        <pre><code id="cmdMacValidate">lsof -i :9119
+curl http://127.0.0.1:9119/api/status</code></pre>
+        <button class="copy-button" data-copy="cmdMacValidate">Copiar validação no Mac</button>
+        <p>Depois abra: <strong>http://127.0.0.1:9119</strong>. O dashboard deve carregar.</p>
+      </div>
+
+      <div class="section-heading compact-heading">
+        <h3>Comandos úteis de manutenção</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ação</th><th>Comando</th></tr></thead>
+          <tbody>
+            <tr><td>Ver se dashboard está rodando</td><td><code>docker exec hermes-agent-vt3l-hermes-agent-1 ps aux | grep dashboard</code></td></tr>
+            <tr><td>Ver logs do dashboard</td><td><code>docker exec hermes-agent-vt3l-hermes-agent-1 tail -f /opt/data/dashboard.log</code></td></tr>
+            <tr><td>Reiniciar dashboard</td><td><code>docker exec hermes-agent-vt3l-hermes-agent-1 bash -c "pkill -f 'hermes dashboard'; sleep 2; nohup hermes dashboard --host 0.0.0.0 --port 9119 --insecure --no-open &gt; /opt/data/dashboard.log 2&gt;&amp;1 &amp;"</code></td></tr>
+            <tr><td>Fechar túnel SSH no Mac</td><td><code>kill $(lsof -t -i:9119)</code></td></tr>
+            <tr><td>Verificar túnel ativo no Mac</td><td><code>lsof -i :9119</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cards two">
+        <article class="card warning"><h3>Nota de segurança</h3><p>O dashboard roda com <code>--insecure</code> porque precisa escutar em <code>0.0.0.0</code> dentro do container. A proteção vem do fato de que o acesso externo é feito por túnel SSH, não por porta pública.</p></article>
+        <article class="card"><h3>Persistência</h3><p>O comando com <code>nohup ... &amp;</code> não sobrevive necessariamente a reboot/recriação do container. Para produção, considere um segundo serviço <code>hermes-dashboard</code> no docker-compose.</p></article>
+      </div>
+
+      <div class="section-heading compact-heading">
+        <h3>Checklist de validação final</h3>
+      </div>
+      <div class="checklist">
+        <label><input type="checkbox"> docker-compose.yaml com <code>"9119:9119"</code>, sem <code>127.0.0.1</code> no host.</label>
+        <label><input type="checkbox"> Container com status <strong>Running</strong>.</label>
+        <label><input type="checkbox"> Dentro do container: <code>curl http://127.0.0.1:9119/api/status</code> retorna JSON.</label>
+        <label><input type="checkbox"> Fora do container/VPS: <code>curl http://127.0.0.1:9119/api/status</code> retorna JSON.</label>
+        <label><input type="checkbox"> Mac: <code>lsof -i :9119</code> mostra processo <code>ssh</code>.</label>
+        <label><input type="checkbox"> Mac: <code>curl http://127.0.0.1:9119/api/status</code> retorna JSON.</label>
+        <label><input type="checkbox"> Navegador em <code>http://127.0.0.1:9119</code> carrega o dashboard.</label>
+        <label><input type="checkbox"> Telegram/Hermes Boy continua respondendo após a alteração.</label>
+      </div>
     </section>
 
     <section class="section" id="checklist">
