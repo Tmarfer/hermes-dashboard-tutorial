@@ -63,3 +63,15 @@ O tutorial agora inclui uma aba/seção completa para acessar o Hermes Dashboard
 - Túnel SSH no Mac com `ssh -f -N -L 9119:127.0.0.1:9119`
 - Comandos de manutenção
 - Checklist final de validação
+
+
+## Redesign Anthropic-inspired
+
+A página foi redesenhada como um “manual operacional premium”, inspirado em princípios do artigo da Anthropic sobre harness design para long-running application development:
+
+- Planner / Generator / Evaluator como estrutura de operação
+- Critérios de Design Quality, Originality, Craft e Functionality
+- Visual editorial com fundo parchment, terracotta, cards ivory, seções dark e tipografia serif para títulos
+- Melhor usabilidade em comandos copiáveis, navegação por âncoras, SSH Tunnel e QA checklist
+
+Observação: a tentativa com `qwen2.5-coder:7b` foi registrada, mas o ambiente não tinha memória suficiente para executar o modelo 7B; foi usado fallback local `qwen2.5-coder:1.5b` para gerar a proposta, com consolidação final pelo Hermes Boy.
