@@ -75,3 +75,8 @@ A página foi redesenhada como um “manual operacional premium”, inspirado em
 - Melhor usabilidade em comandos copiáveis, navegação por âncoras, SSH Tunnel e QA checklist
 
 Observação: a tentativa com `qwen2.5-coder:7b` foi registrada, mas o ambiente não tinha memória suficiente para executar o modelo 7B; foi usado fallback local `qwen2.5-coder:1.5b` para gerar a proposta, com consolidação final pelo Hermes Boy.
+
+
+## Redesign interativo com sidebar
+
+A aplicação foi refatorada para navegação por painéis: sidebar desktop, drawer mobile, modais de detalhes, SVGs inline de fluxo e blocos de comando com copiar. A proposta foi gerada com `qwen7b-ctx2k` (derivado de qwen2.5-coder:7b com `num_ctx 2048`) e consolidada pelo Hermes Boy.
